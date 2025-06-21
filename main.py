@@ -1,24 +1,20 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from llama_cpp import Llama
-import os
 
 app = FastAPI()
 
-# CORS setup to allow requests from your browser extension or frontend
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with allowed domains
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Load your locally hosted GGUF model
-model_path = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "models/gemma-3-1b-it-Q4_K_M.gguf")
-)
-
+# Load model (relative path fix)
+model_path = "models/gemma-3-1b-it-Q4_K_M.gguf"
 llm = Llama(
     model_path=model_path,
     n_ctx=2048,
@@ -27,12 +23,10 @@ llm = Llama(
     verbose=False
 )
 
-# Basic test route
 @app.get("/")
 def read_root():
     return {"message": "LLM backend is running 🧠⚡"}
 
-# Main LLM endpoint
 @app.post("/generate")
 async def generate_response(_: Request):
     fixed_instruction = (
